@@ -1,16 +1,23 @@
 server:
-  port: 9099
+  port: 8080
   servlet:
     context-path: /flight-api
+  address: 0.0.0.0
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/flight_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://zcj-flightdb.czq64oa0gkl9.ca-central-1.rds.amazonaws.com:3306/flight_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: admin
+    password: admin001
+    driver-class-name: com.mysql.cj.jdbc.Driver  
+  # datasource:
+    # url: ${SPRING_DATASOURCE_URL}
+    # username: ${SPRING_DATASOURCE_USERNAME}
+    # password: ${SPRING_DATASOURCE_PASSWORD}
+    # driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
+      # ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
       ddl-auto: update
     show-sql: true
     properties:
@@ -33,8 +40,21 @@ jwt:
   secret: your-secret-key-here-must-be-at-least-32-characters
   expiration: 86400000 # 24 hours in milliseconds
 
-cors:
-  allowed-origins: http://localhost:3000
-  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
-  allowed-headers: "*"
-  allow-credentials: true
+# cors:
+#   allowed-origins: "http://localhost,http://localhost:80"
+#   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+#   allowed-headers: "*"
+#   allow-credentials: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    filter: true
+  packages-to-scan: com.flight.api.controller
+  paths-to-match: /api/**

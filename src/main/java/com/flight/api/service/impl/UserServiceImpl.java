@@ -50,8 +50,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
+            String token = jwtTokenProvider.generateToken(authentication);
             log.info("New user {} registered and logged in successfully.", request.getEmail());
-            return jwtTokenProvider.generateToken(authentication);
+            log.info("Returning JWT token for registered user: {}", request.getEmail());
+            return token;
         } catch (AuthenticationException e) {
             log.error("Authentication failed immediately after registration for user {}: {}", request.getEmail(), e.getMessage());
             throw new RuntimeException("Registration successful but immediate login failed.", e);
@@ -67,7 +69,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        log.info("Created user with ID: {}, email: {}", savedUser.getUserId(), savedUser.getEmail());
+        return savedUser;
     }
 
     @Override
@@ -76,8 +80,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
             );
+            String token = jwtTokenProvider.generateToken(authentication);
             log.info("User {} logged in successfully.", email);
-            return jwtTokenProvider.generateToken(authentication);
+            log.info("Returning JWT token for logged in user: {}", email);
+            return token;
         } catch (AuthenticationException e) {
             log.error("Authentication failed for user {}: {}", email, e.getMessage());
             throw e; // Re-throw the exception after logging
@@ -87,15 +93,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public User getUserById(Long userId) {
-        return userRepository.findById(userId)
+        User user = userRepository.findById(userId)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+        log.info("Retrieved user with ID: {}, email: {}", user.getUserId(), user.getEmail());
+        return user;
     }
 
     @Override
     @Transactional(readOnly = true)
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        log.info("Retrieved user with email: {}, ID: {}", user.getEmail(), user.getUserId());
+        return user;
     }
 
     @Override
@@ -108,13 +118,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        userRepository.save(existingUser);
+        User updatedUser = userRepository.save(existingUser);
+        log.info("Updated user with ID: {}, email: {}", updatedUser.getUserId(), updatedUser.getEmail());
     }
 
     @Override
     @Transactional
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
+        log.info("Deleted user with ID: {}", userId);
     }
 
     @Override
@@ -129,10 +141,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         log.info("User {} found. User ID: {}", user.getEmail(), user.getUserId());
 
         // Return Spring Security's User object
-        return new org.springframework.security.core.userdetails.User(
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
             user.getEmail(),
             user.getPassword(),
             Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
+        log.info("Returning UserDetails for user: {}", email);
+        return userDetails;
     }
 } 

@@ -7,7 +7,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.flight.api.dto.AirportDTO;
 import com.flight.api.dto.ApiResponse;
@@ -60,6 +64,7 @@ public class FlightController {
             
             if (departureFlights.isEmpty()) {
                 log.info("No departure flights found");
+                log.info("Returning empty flight search response");
                 return ResponseEntity.ok(ApiResponse.success("No flights found for your search criteria", response));
             }
             
@@ -71,9 +76,11 @@ public class FlightController {
                     departureFlights.getTotalElements());
             
             log.info(message);
+            log.info("Returning flight search response with {} departure flights", departureFlights.getTotalElements());
             return ResponseEntity.ok(ApiResponse.success(message, response));
         } catch (Exception e) {
             log.error("Error searching flights", e);
+            log.error("Returning error response for flight search: {}", e.getMessage());
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error(400, "Error searching flights: " + e.getMessage()));
         }
@@ -83,8 +90,12 @@ public class FlightController {
     public ResponseEntity<ApiResponse<List<AirportDTO>>> getAirports() {
         try {
             List<AirportDTO> airports = flightService.getAllAirports();
+            log.info("Retrieved {} airports successfully", airports.size());
+            log.info("Returning airports response with {} airports", airports.size());
             return ResponseEntity.ok(ApiResponse.success("Airports retrieved successfully", airports));
         } catch (Exception e) {
+            log.error("Error retrieving airports: {}", e.getMessage());
+            log.error("Returning error response for airports: {}", e.getMessage());
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error(400, "Error retrieving airports: " + e.getMessage()));
         }
@@ -94,8 +105,12 @@ public class FlightController {
     public ResponseEntity<ApiResponse<List<String>>> getCabinClasses() {
         try {
             List<String> cabinClasses = List.of("economy", "business", "firstClass");
+            log.info("Retrieved {} cabin classes successfully", cabinClasses.size());
+            log.info("Returning cabin classes response: {}", cabinClasses);
             return ResponseEntity.ok(ApiResponse.success("Cabin classes retrieved successfully", cabinClasses));
         } catch (Exception e) {
+            log.error("Error retrieving cabin classes: {}", e.getMessage());
+            log.error("Returning error response for cabin classes: {}", e.getMessage());
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error(400, "Error retrieving cabin classes: " + e.getMessage()));
         }

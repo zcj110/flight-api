@@ -11,10 +11,12 @@ import com.flight.api.repository.PassengerRepository;
 import com.flight.api.service.PassengerService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class PassengerServiceImpl implements PassengerService {
 
     @Autowired
@@ -22,26 +24,36 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     public Passenger createPassenger(Passenger passenger) {
-        return passengerRepository.save(passenger);
+        Passenger savedPassenger = passengerRepository.save(passenger);
+        log.info("Created passenger with ID: {}, name: {} {}", 
+                savedPassenger.getPassengerId(), savedPassenger.getFirstName(), savedPassenger.getLastName());
+        return savedPassenger;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Passenger getPassengerById(Long passengerId) {
-        return passengerRepository.findById(passengerId)
+        Passenger passenger = passengerRepository.findById(passengerId)
                 .orElseThrow(() -> new RuntimeException("Passenger not found with id: " + passengerId));
+        log.info("Retrieved passenger with ID: {}, name: {} {}", 
+                passenger.getPassengerId(), passenger.getFirstName(), passenger.getLastName());
+        return passenger;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Passenger> getPassengersByBookingId(Long bookingId) {
-        return passengerRepository.findByBookingBookingId(bookingId);
+        List<Passenger> passengers = passengerRepository.findByBookingBookingId(bookingId);
+        log.info("Retrieved {} passengers for booking ID: {}", passengers.size(), bookingId);
+        return passengers;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Passenger> getPassengersByPassportNumber(String passportNumber) {
-        return passengerRepository.findByPassportNumber(passportNumber);
+        List<Passenger> passengers = passengerRepository.findByPassportNumber(passportNumber);
+        log.info("Retrieved {} passengers for passport number: {}", passengers.size(), passportNumber);
+        return passengers;
     }
 
     @Override
@@ -52,7 +64,10 @@ public class PassengerServiceImpl implements PassengerService {
         existingPassenger.setPassportNumber(passenger.getPassportNumber());
         existingPassenger.setEmail(passenger.getEmail());
         existingPassenger.setType(passenger.getType());
-        return passengerRepository.save(existingPassenger);
+        Passenger updatedPassenger = passengerRepository.save(existingPassenger);
+        log.info("Updated passenger with ID: {}, name: {} {}", 
+                updatedPassenger.getPassengerId(), updatedPassenger.getFirstName(), updatedPassenger.getLastName());
+        return updatedPassenger;
     }
 
     @Override
@@ -61,5 +76,6 @@ public class PassengerServiceImpl implements PassengerService {
             throw new RuntimeException("Passenger not found with id: " + passengerId);
         }
         passengerRepository.deleteById(passengerId);
+        log.info("Deleted passenger with ID: {}", passengerId);
     }
 } 

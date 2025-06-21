@@ -23,6 +23,7 @@
         <jwt.version>0.12.6</jwt.version>
         <lombok.version>1.18.38</lombok.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+        <springdoc.version>2.3.0</springdoc.version>
     </properties>
 
     <dependencies>
@@ -82,6 +83,13 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${org.mapstruct.version}</version>
+        </dependency>
+
+        <!-- SpringDoc OpenAPI (Swagger) -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
 
         <!-- Test -->
