@@ -10,5 +10,5 @@ FROM eclipse-temurin:21-jre
 # FROM openjdk:21-jre-slim
 WORKDIR /app
 COPY target/*.jar app.jar
-EXPOSE 9099
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"] 
